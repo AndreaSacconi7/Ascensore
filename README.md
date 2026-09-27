@@ -43,26 +43,34 @@ At the start of every set each player **bets exactly how many tricks they will t
 
 ```mermaid
 flowchart LR
-    UI["Flutter UI<br/>(pages + widgets)"] -- "Provider / Selector" --> CM["ClientManager<br/>(ChangeNotifier)"]
-    CM -- "Command (JSON)" --> L["ServerLink<br/>reconnect + backoff"]
-    L -- "Message (JSON)" --> Q[["message queue"]]
-    Q --> CM
+    UI["Flutter UI<br/>(pages + widgets)"] -- "screen" --> APP["AppController"]
+    UI -- "Provider / Selector" --> SE["SessionController<br/>account · nickname · connection"]
+    UI -- "Provider / Selector" --> MA["MatchController<br/>matchmaking · table · moves"]
+    SE -- "sign in / refresh" --> A["AuthService<br/>(Supabase Auth)"]
+    SE --> L["ServerLink<br/>reconnect + heartbeat"]
     L <--> S["Spring Boot server"]
-    CM -- "sign in / refresh" --> A["AuthService<br/>(Supabase Auth)"]
-    S -- "verify JWT (JWKS)" --> SB["Supabase"]
+    L -- "Message (JSON)" --> Q[["MessageInbox<br/>ordered, with pauses"]]
+    LM["LocalMatch + bots<br/>(offline)"] -- "Message (JSON)" --> Q
+    Q --> SE
+    Q --> MA
+    MA -- "Command (JSON)" --> L
+    MA -- "Command (JSON)" --> LM
 ```
+
+- **State split by concern** — `SessionController` owns who the player is and the connection; `MatchController` owns matchmaking, the table and the moves, online or offline; `MessageInbox` applies server messages to them in order. `AppController` wires them together and derives the screen from where the session and the match are, instead of every handler setting it. Pages watch only the part they show, so a card played does not rebuild the menu or the login page.
 
 - **Ordered message queue** — server messages are applied strictly in arrival order. After a trick or a set the queue pauses for a few seconds so players can see the cards; messages that arrive meanwhile wait instead of being applied early or out of order, and logging out cancels the pause cleanly.
 - **Connection is not session** — `ServerLink` owns the socket and reconnects with backoff when it drops; every new connection identifies the player again, which is also how the server resumes a match. A heartbeat detects connections that died without notice. Only an explicit logout (or a refused token) signs the player out.
-- **Offline engine** — `lib/offline/local_match.dart` runs a match on the device and `bot.dart` plays the computer opponents (bet from the likely tricks in hand; win cheaply when a trick is needed, otherwise dump strong cards that lose). `ClientManager` sends commands to it instead of the server; tests play complete 19-set matches against 1, 2 and 3 bots.
+- **Offline engine** — `lib/offline/local_match.dart` runs a match on the device and `bot.dart` plays the computer opponents (bet from the likely tricks in hand; win cheaply when a trick is needed, otherwise dump strong cards that lose). `MatchController` sends commands to it instead of the server; tests play complete 19-set matches against 1, 2 and 3 bots.
 - **Command / message protocol** — the client sends intentions (`SET_BET`, `PUT_CARD`, …) with no player name in them (the server knows who is on the socket); every server event is decoded by a registry in `server_message.dart` into a class that applies itself to the state. The wire format is documented in the server repository (`docs/protocol.md`).
-- **Testable seams** — the socket (`GameConnection`) and Supabase (`AuthService`) sit behind interfaces, so `ClientManager` is tested with fakes in fake time: login and nicknames, trick and set pauses, reconnection mid-match, logout during a pause.
+- **Testable seams** — the socket (`GameConnection`) and Supabase (`AuthService`) sit behind interfaces, so the whole client state (`AppController`) is tested with fakes in fake time: login and nicknames, trick and set pauses, reconnection mid-match, logout during a pause.
 - **Contract test against the real server** — `test/fixtures/real_match.jsonl` holds every message the real server sent to two players during a full match, including a dropped connection and the reconnection; both players' clients replay it and must end on the server's final scores.
 
 - **Design system** — colours, radii and component themes live in `lib/ui/theme.dart`; reusable pieces (glass panels, buttons, avatars, cards, the floor indicator) in `lib/ui/`. The game screen is split into small widgets under `lib/pages/game/`.
 
 ```
 lib/
+├── state/     # AppController, SessionController, MatchController, MessageInbox
 ├── ui/        # theme and shared components
 ├── auth/      # AuthService (Supabase)
 ├── network/   # GameConnection (WebSocket), ServerLink (reconnection, heartbeat)
@@ -70,8 +78,7 @@ lib/
 ├── command/   # client → server commands
 ├── message/   # server → client messages and their decoders
 ├── model/     # game state, players, cards, rules
-├── pages/     # screens
-└── widgets/   # reusable UI components
+└── pages/     # screens (the game screen's parts in pages/game/)
 ```
 
 ## Running

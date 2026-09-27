@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 class SettedBetUpdate implements ExecutableInClient {
@@ -10,5 +10,5 @@ class SettedBetUpdate implements ExecutableInClient {
         nickname = json['nickname'] as String;
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleSettedBet(this);
+  void execute(AppController app) => app.match.handleSettedBet(this);
 }

@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import '../model/card_game.dart';
 import 'executable_in_client.dart';
 
@@ -11,5 +11,5 @@ class BriscolaUpdate implements ExecutableInClient {
             json['briscolaCard'] == null ? null : CardGame.fromJson(json['briscolaCard'] as Map<String, dynamic>);
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleBriscolaUpdate(this);
+  void execute(AppController app) => app.match.handleBriscolaUpdate(this);
 }

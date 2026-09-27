@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'auth/auth_service.dart';
-import 'client_manager.dart';
 import 'network/game_connection.dart';
+import 'state/app_controller.dart';
+import 'state/app_providers.dart';
 
 // Game server endpoint, overridable with --dart-define=SERVER_URL=wss://host/ws
 const _serverUrlOverride = String.fromEnvironment('SERVER_URL');
@@ -27,13 +27,9 @@ Future<void> main() async {
     ),
   );
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ClientManager(
-        auth: SupabaseAuthService(),
-        connector: () => WebSocketGameConnection.connect(_serverUrl),
-      ),
-      child: const AscensoreApp(),
-    ),
+  final app = AppController(
+    auth: SupabaseAuthService(),
+    connector: () => WebSocketGameConnection.connect(_serverUrl),
   );
+  runApp(AppProviders(app: app, child: const AscensoreApp()));
 }

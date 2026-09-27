@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../client_manager.dart';
 import '../model/player.dart';
 import '../model/player_state.dart';
+import '../state/match_controller.dart';
+import '../state/session_controller.dart';
 import '../ui/components.dart';
 import '../ui/game_widgets.dart';
 import '../ui/theme.dart';
@@ -15,9 +16,10 @@ class GameOverScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final manager = context.watch<ClientManager>();
-    final game = manager.game;
-    final me = manager.mySelfPlayer;
+    final match = context.watch<MatchController>();
+    final isGuest = context.select<SessionController, bool>((s) => s.isGuest);
+    final game = match.game;
+    final me = match.me;
     if (game == null || me == null) return const SizedBox.shrink();
 
     final ranking = List.of(game.players)..sort((a, b) => b.score.compareTo(a.score));
@@ -78,13 +80,13 @@ class GameOverScreen extends StatelessWidget {
                 label: 'GIOCA ANCORA',
                 icon: Icons.replay_rounded,
                 // Same kind of match: online with the same size, or offline with the same bots
-                onPressed: manager.playAgain,
+                onPressed: match.playAgain,
               ),
               const SizedBox(height: 12),
               AppButton(
-                label: manager.isGuest ? 'Esci' : 'Torna al menu',
+                label: isGuest ? 'Esci' : 'Torna al menu',
                 style: AppButtonStyle.secondary,
-                onPressed: manager.backToMenu,
+                onPressed: match.backToMenu,
               ),
             ],
           ),

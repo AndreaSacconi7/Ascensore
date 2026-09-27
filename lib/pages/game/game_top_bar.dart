@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../../client_manager.dart';
 import '../../model/game.dart';
 import '../../model/player_state.dart';
 import '../../ui/game_widgets.dart';
 import '../../ui/theme.dart';
 import '../rules_sheet.dart';
+import '../../state/match_controller.dart';
 
 /// Where the match is (elevator floor), the briscola, and the rules.
 class GameTopBar extends StatelessWidget {
@@ -94,7 +94,7 @@ class GameTopBar extends StatelessWidget {
       ),
     );
     if (leave == true && context.mounted) {
-      context.read<ClientManager>().leaveGame();
+      context.read<MatchController>().leaveGame();
     }
   }
 

@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 class EndGame implements ExecutableInClient {
@@ -8,5 +8,5 @@ class EndGame implements ExecutableInClient {
   EndGame.fromJson(Map<String, dynamic> json) : gameResult = intMap(json['gameResult']);
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleEndGame(this);
+  void execute(AppController app) => app.match.handleEndGame(this);
 }

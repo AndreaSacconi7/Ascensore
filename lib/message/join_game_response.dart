@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 class JoinGameResponse implements ExecutableInClient {
@@ -12,5 +12,5 @@ class JoinGameResponse implements ExecutableInClient {
         playersPerMatch = json['playersPerMatch'] as int? ?? 2;
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleJoinGameResponse(this);
+  void execute(AppController app) => app.match.handleJoinGameResponse(this);
 }

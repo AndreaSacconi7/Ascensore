@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../client_manager.dart';
 import '../ui/components.dart';
 import '../ui/game_widgets.dart';
 import '../ui/theme.dart';
+import '../state/match_controller.dart';
+import '../state/session_controller.dart';
 import 'offline_sheet.dart';
 import 'rules_sheet.dart';
 
@@ -16,14 +17,15 @@ class MainMenuScreen extends StatefulWidget {
 }
 
 class _MainMenuScreenState extends State<MainMenuScreen> {
-  late int _players = context.read<ClientManager>().matchSize;
-  late int _bots = context.read<ClientManager>().offlineBots;
+  late int _players = context.read<MatchController>().matchSize;
+  late int _bots = context.read<MatchController>().offlineBots;
   bool _offline = false;
 
   @override
   Widget build(BuildContext context) {
-    final manager = context.read<ClientManager>();
-    final nickname = context.select<ClientManager, String>((m) => m.mySelfPlayer?.nickname ?? '');
+    final match = context.read<MatchController>();
+    final session = context.read<SessionController>();
+    final nickname = context.select<SessionController, String>((s) => s.nickname ?? '');
     final textTheme = Theme.of(context).textTheme;
 
     return SafeArea(
@@ -49,7 +51,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   ),
                   IconButton(
                     tooltip: 'Esci',
-                    onPressed: manager.logOut,
+                    onPressed: session.logOut,
                     icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
                   ),
                 ],
@@ -110,8 +112,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     AppButton(
                       label: 'GIOCA',
                       icon: _offline ? Icons.smart_toy_rounded : Icons.play_arrow_rounded,
-                      onPressed: () =>
-                          _offline ? manager.playOffline(bots: _bots) : manager.joinGame(players: _players),
+                      onPressed: () => _offline ? match.playOffline(bots: _bots) : match.joinGame(players: _players),
                     ),
                   ],
                 ),

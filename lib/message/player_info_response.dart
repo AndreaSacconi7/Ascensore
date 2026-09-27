@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 class PlayerInfoResponse implements ExecutableInClient {
@@ -26,5 +26,5 @@ class PlayerInfoResponse implements ExecutableInClient {
         error = json['error'] as String?;
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handlePlayerInfo(this);
+  void execute(AppController app) => app.handlePlayerInfo(this);
 }

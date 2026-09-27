@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ascensore_client/app_screen_state.dart';
-import 'package:ascensore_client/client_manager.dart';
+import 'package:ascensore_client/state/app_controller.dart';
 import 'package:ascensore_client/message/server_message.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,17 +30,17 @@ void main() {
       fakeAsync((async) {
         final connector = FakeConnector();
         // No heartbeat: the recorded server never answers pings
-        final manager = ClientManager(
+        final manager = AppController(
           auth: FakeAuthService(token: 'token'),
           connector: connector.call,
           heartbeatInterval: const Duration(days: 1),
         );
-        manager.checkLoginStatus();
+        manager.session.checkLoginStatus();
         async.flushMicrotasks();
 
         final received = messages.where((m) => m['to'] == player).toList();
         for (final m in received) {
-          if (m['messageType'] == 'JOIN_GAME_RESPONSE') manager.joinGame();
+          if (m['messageType'] == 'JOIN_GAME_RESPONSE') manager.match.joinGame();
           connector.last.receive(m['messageType'] as String, m['executable'] as Map<String, dynamic>? ?? {});
           async.flushMicrotasks();
           async.elapse(const Duration(milliseconds: 10));
@@ -49,11 +49,11 @@ void main() {
         async.elapse(const Duration(minutes: 2));
 
         final result = received.lastWhere((m) => m['messageType'] == 'END_GAME')['executable']['gameResult'] as Map;
-        expect(manager.currentScreen, AppScreenState.gameOver);
+        expect(manager.screen, AppScreenState.gameOver);
         result.forEach((nickname, score) {
-          expect(manager.game!.playerNamed(nickname as String)!.score, score, reason: nickname);
+          expect(manager.match.game!.playerNamed(nickname as String)!.score, score, reason: nickname);
         });
-        expect(manager.mySelfPlayer!.handCards, isEmpty);
+        expect(manager.match.me!.handCards, isEmpty);
       });
     });
   }

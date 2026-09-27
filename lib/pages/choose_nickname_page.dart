@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../client_manager.dart';
 import '../message/player_info_response.dart';
 import '../ui/components.dart';
 import '../ui/game_widgets.dart';
 import '../ui/theme.dart';
+import '../state/session_controller.dart';
 
 /// Shown once per account: the public name other players see (never the email address).
 class ChooseNicknamePage extends StatefulWidget {
@@ -34,7 +34,7 @@ class _ChooseNicknamePageState extends State<ChooseNicknamePage> {
     super.dispose();
   }
 
-  void _submit(ClientManager manager) {
+  void _submit(SessionController manager) {
     final nickname = _controller.text.trim();
     if (!ChooseNicknamePage.nicknamePattern.hasMatch(nickname)) {
       setState(() => _localError = 'Da 3 a 16 caratteri: lettere, numeri o _');
@@ -51,7 +51,7 @@ class _ChooseNicknamePageState extends State<ChooseNicknamePage> {
 
   @override
   Widget build(BuildContext context) {
-    final manager = context.watch<ClientManager>();
+    final manager = context.watch<SessionController>();
     final error = _localError ?? _serverErrorText(manager.nicknameError);
     final nickname = _controller.text.trim();
 

@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 /// Why the server rejected this player's last command.
@@ -8,5 +8,5 @@ class TextMessage implements ExecutableInClient {
   TextMessage.fromJson(Map<String, dynamic> json) : text = json['text'] as String;
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleTextMessage(this);
+  void execute(AppController app) => app.match.handleTextMessage(this);
 }

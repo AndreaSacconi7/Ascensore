@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 /// Who is waiting in your match, sent whenever someone joins or leaves before it starts.
@@ -13,5 +13,5 @@ class WaitingRoomUpdate implements ExecutableInClient {
         players = List<String>.from(json['players'] as List? ?? const []);
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleWaitingRoomUpdate(this);
+  void execute(AppController app) => app.match.handleWaitingRoomUpdate(this);
 }

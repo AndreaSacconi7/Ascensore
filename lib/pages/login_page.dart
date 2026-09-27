@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../authentication_state.dart';
-import '../client_manager.dart';
 import '../ui/components.dart';
 import '../ui/game_widgets.dart';
 import '../ui/theme.dart';
 import 'offline_sheet.dart';
+import '../state/session_controller.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ClientManager>().checkLoginStatus();
+      context.read<SessionController>().checkLoginStatus();
     });
   }
 
@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _submit(ClientManager manager) {
+  void _submit(SessionController manager) {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     if (email.isEmpty || password.isEmpty) {
@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final manager = context.watch<ClientManager>();
+    final manager = context.watch<SessionController>();
     final loading = manager.authState == AuthenticationState.loading;
 
     // Take a pending error from the manager and keep it next to the form

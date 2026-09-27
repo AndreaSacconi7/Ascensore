@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../client_manager.dart';
 import '../../ui/components.dart';
 import '../../ui/game_widgets.dart';
 import '../../ui/theme.dart';
+import '../../state/match_controller.dart';
+import '../../state/session_controller.dart';
 
 /// Matchmaking: an elevator riding up and down, the seats already taken and those still free.
 class WaitingView extends StatefulWidget {
@@ -26,9 +27,10 @@ class _WaitingViewState extends State<WaitingView> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final manager = context.watch<ClientManager>();
-    final room = manager.waitingRoom;
-    final size = room?.playersPerMatch ?? manager.matchSize;
+    final match = context.watch<MatchController>();
+    final myNickname = context.select<SessionController, String?>((s) => s.nickname);
+    final room = match.waitingRoom;
+    final size = room?.playersPerMatch ?? match.matchSize;
     final joined = room?.players ?? const <String>[];
     final missing = (size - joined.length).clamp(0, size);
     final textTheme = Theme.of(context).textTheme;
@@ -70,7 +72,7 @@ class _WaitingViewState extends State<WaitingView> with SingleTickerProviderStat
                   children: [
                     for (var i = 0; i < size; i++)
                       i < joined.length
-                          ? _Seat(nickname: joined[i], isMe: joined[i] == manager.mySelfPlayer?.nickname)
+                          ? _Seat(nickname: joined[i], isMe: joined[i] == myNickname)
                           : const _EmptySeat(),
                   ],
                 ),
@@ -80,7 +82,7 @@ class _WaitingViewState extends State<WaitingView> with SingleTickerProviderStat
                 label: 'Annulla',
                 icon: Icons.close_rounded,
                 style: AppButtonStyle.secondary,
-                onPressed: manager.leaveGame,
+                onPressed: match.leaveGame,
               ),
             ],
           ),

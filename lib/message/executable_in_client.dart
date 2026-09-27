@@ -1,8 +1,8 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 
-/// Payload of a server message; applies itself to the client state.
+/// Payload of a server message; applies itself to the part of the client state it concerns.
 abstract class ExecutableInClient {
-  void execute({required ClientManager clientManager});
+  void execute(AppController app);
 }
 
 /// Reads a JSON object of nickname -> int, keeping the server's key order (it carries meaning).

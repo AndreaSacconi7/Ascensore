@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 /// A trick is over.
@@ -14,5 +14,5 @@ class EndRoundUpdate implements ExecutableInClient {
         nextRoundNumber = json['nextRoundNumber'] as int;
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleEndRoundUpdate(this);
+  void execute(AppController app) => app.match.handleEndRoundUpdate(this);
 }

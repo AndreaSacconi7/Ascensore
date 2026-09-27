@@ -11,8 +11,10 @@ import 'package:ascensore_client/pages/main_menu_screen.dart';
 import 'package:ascensore_client/pages/session_replaced_page.dart';
 
 import 'app_screen_state.dart';
-import 'client_manager.dart';
 import 'network/server_link.dart';
+import 'state/app_controller.dart';
+import 'state/match_controller.dart';
+import 'state/session_controller.dart';
 import 'ui/components.dart';
 import 'ui/theme.dart';
 
@@ -26,26 +28,26 @@ class AppWrapper extends StatefulWidget {
 }
 
 class _AppWrapperState extends State<AppWrapper> {
-  ClientManager? _manager;
+  MatchController? _match;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final manager = context.read<ClientManager>();
-    if (manager != _manager) {
-      _manager?.removeListener(_showNotice);
-      _manager = manager..addListener(_showNotice);
+    final match = context.read<MatchController>();
+    if (match != _match) {
+      _match?.removeListener(_showNotice);
+      _match = match..addListener(_showNotice);
     }
   }
 
   @override
   void dispose() {
-    _manager?.removeListener(_showNotice);
+    _match?.removeListener(_showNotice);
     super.dispose();
   }
 
   void _showNotice() {
-    final notice = _manager?.consumeNotice();
+    final notice = _match?.consumeNotice();
     if (notice == null || !mounted) return;
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
@@ -54,9 +56,10 @@ class _AppWrapperState extends State<AppWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    final screen = context.select<ClientManager, AppScreenState>((m) => m.currentScreen);
+    final screen = context.select<AppController, AppScreenState>((app) => app.screen);
     // Offline matches do not need the connection, so its state is not shown during them
-    final linkState = context.select<ClientManager, LinkState>((m) => m.isOffline ? LinkState.connected : m.linkState);
+    final offline = context.select<MatchController, bool>((m) => m.isOffline);
+    final linkState = context.select<SessionController, LinkState>((s) => s.linkState);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -68,7 +71,7 @@ class _AppWrapperState extends State<AppWrapper> {
               switchInCurve: Curves.easeOutCubic,
               child: KeyedSubtree(key: ValueKey(screen), child: _buildScreen(screen)),
             ),
-            if (linkState == LinkState.reconnecting) const _ReconnectingBanner(),
+            if (linkState == LinkState.reconnecting && !offline) const _ReconnectingBanner(),
           ],
         ),
       ),

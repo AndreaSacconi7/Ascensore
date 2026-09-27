@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 class PlayerExitGame implements ExecutableInClient {
@@ -7,5 +7,5 @@ class PlayerExitGame implements ExecutableInClient {
   PlayerExitGame.fromJson(Map<String, dynamic> json) : nickname = json['nickname'] as String;
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handlePlayerExitGame(this);
+  void execute(AppController app) => app.match.handlePlayerExitGame(this);
 }

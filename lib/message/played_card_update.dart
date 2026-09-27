@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import '../model/card_game.dart';
 import 'executable_in_client.dart';
 
@@ -11,5 +11,5 @@ class PlayedCardUpdate implements ExecutableInClient {
         playedCard = CardGame.fromJson(json['playedCard'] as Map<String, dynamic>);
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handlePlayedCard(this);
+  void execute(AppController app) => app.match.handlePlayedCard(this);
 }

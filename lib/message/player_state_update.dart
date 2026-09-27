@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import '../model/player_state.dart';
 import 'executable_in_client.dart';
 
@@ -22,5 +22,5 @@ class PlayerStateUpdate implements ExecutableInClient {
         receivedAt = DateTime.now();
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handlePlayerStateUpdate(this);
+  void execute(AppController app) => app.match.handlePlayerStateUpdate(this);
 }

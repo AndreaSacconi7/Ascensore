@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 /// A set is over.
@@ -18,5 +18,5 @@ class EndSetUpdate implements ExecutableInClient {
         setsPlayed = json['setsPlayed'] as int?;
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleEndSetUpdate(this);
+  void execute(AppController app) => app.match.handleEndSetUpdate(this);
 }

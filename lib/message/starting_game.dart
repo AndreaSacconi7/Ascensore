@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import 'executable_in_client.dart';
 
 class StartingGame implements ExecutableInClient {
@@ -13,5 +13,5 @@ class StartingGame implements ExecutableInClient {
         maxHandSize = json['maxHandSize'] as int? ?? 10;
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleStartingGame(this);
+  void execute(AppController app) => app.match.handleStartingGame(this);
 }

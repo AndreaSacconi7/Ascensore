@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../client_manager.dart';
 import '../ui/components.dart';
 import '../ui/theme.dart';
+import '../state/match_controller.dart';
 
 /// Pick how many computer opponents to play against, then start right away (no account needed).
 Future<void> showOfflineSheet(BuildContext context) {
@@ -21,7 +21,7 @@ class _OfflineSheet extends StatefulWidget {
 }
 
 class _OfflineSheetState extends State<_OfflineSheet> {
-  late int _bots = context.read<ClientManager>().offlineBots;
+  late int _bots = context.read<MatchController>().offlineBots;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class _OfflineSheetState extends State<_OfflineSheet> {
               icon: Icons.smart_toy_rounded,
               onPressed: () {
                 Navigator.of(context).pop();
-                context.read<ClientManager>().playOffline(bots: _bots);
+                context.read<MatchController>().playOffline(bots: _bots);
               },
             ),
           ],

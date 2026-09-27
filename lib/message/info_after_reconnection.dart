@@ -1,4 +1,4 @@
-import '../client_manager.dart';
+import '../state/app_controller.dart';
 import '../model/card_game.dart';
 import 'executable_in_client.dart';
 
@@ -27,5 +27,5 @@ class InfoAfterReconnection implements ExecutableInClient {
             .map((key, value) => MapEntry(key, CardGame.fromJson(value as Map<String, dynamic>)));
 
   @override
-  void execute({required ClientManager clientManager}) => clientManager.handleInfoAfterReconnection(this);
+  void execute(AppController app) => app.match.handleInfoAfterReconnection(this);
 }

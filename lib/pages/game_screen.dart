@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../client_manager.dart';
 import '../model/card_game.dart';
 import '../model/game.dart';
 import '../model/game_rules.dart';
 import '../model/my_self_player.dart';
 import '../model/player_state.dart';
 import '../model/set_result_animation_state.dart';
+import '../state/match_controller.dart';
 import '../ui/components.dart';
 import '../ui/game_widgets.dart';
 import '../ui/theme.dart';
@@ -26,23 +26,23 @@ class GameScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ClientManager>(
-      builder: (context, manager, _) {
-        final game = manager.game;
-        final me = manager.mySelfPlayer;
+    return Consumer<MatchController>(
+      builder: (context, match, _) {
+        final game = match.game;
+        final me = match.me;
         if (game == null || me == null) {
           return const WaitingView();
         }
         return Stack(
           children: [
-            SafeArea(child: ContentWidth(maxWidth: 720, child: _Table(manager: manager, game: game, me: me))),
-            if (manager.lastSetResult != SetResultAnimationState.none)
+            SafeArea(child: ContentWidth(maxWidth: 720, child: _Table(match: match, game: game, me: me))),
+            if (match.lastSetResult != SetResultAnimationState.none)
               Positioned.fill(
                 child: IgnorePointer(
                   child: Center(
                     child: SetResultToast(
-                      won: manager.lastSetResult == SetResultAnimationState.win,
-                      delta: manager.lastSetDelta,
+                      won: match.lastSetResult == SetResultAnimationState.win,
+                      delta: match.lastSetDelta,
                     ),
                   ),
                 ),
@@ -55,11 +55,11 @@ class GameScreen extends StatelessWidget {
 }
 
 class _Table extends StatelessWidget {
-  final ClientManager manager;
+  final MatchController match;
   final Game game;
   final MySelfPlayer me;
 
-  const _Table({required this.manager, required this.game, required this.me});
+  const _Table({required this.match, required this.game, required this.me});
 
   bool get _canPlay => me.playerState == PlayerState.PUT;
 
@@ -112,10 +112,10 @@ class _Table extends StatelessWidget {
               me: me,
               opponents: opponents,
               canDrop: (card) => _canPlay && _isPlayable(card),
-              onDrop: manager.putCard,
+              onDrop: match.putCard,
               // Betting happens on the empty table, so your hand stays visible below
               overlay: me.playerState == PlayerState.BET
-                  ? BetPanel(key: ValueKey('bet-${game.setNumber}'), game: game, me: me, onBet: manager.setBet)
+                  ? BetPanel(key: ValueKey('bet-${game.setNumber}'), game: game, me: me, onBet: match.setBet)
                   : null,
             ),
           ),
@@ -165,7 +165,7 @@ class _Table extends StatelessWidget {
             cards: me.handCards,
             canPlay: _canPlay,
             isPlayable: _isPlayable,
-            onPlay: manager.putCard,
+            onPlay: match.putCard,
             onBlocked: (_) => _explainBlocked(context),
           ),
         ),

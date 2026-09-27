@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../client_manager.dart';
 import '../ui/components.dart';
 import '../ui/theme.dart';
+import '../state/session_controller.dart';
 
 /// The account is now in use on another device; nothing reconnects until the player asks.
 class SessionReplacedPage extends StatelessWidget {
@@ -11,7 +11,7 @@ class SessionReplacedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final manager = context.read<ClientManager>();
+    final manager = context.read<SessionController>();
     final textTheme = Theme.of(context).textTheme;
     return SafeArea(
       child: Center(

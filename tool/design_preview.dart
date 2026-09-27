@@ -7,9 +7,9 @@
 import 'dart:async';
 
 import 'package:ascensore_client/app.dart';
-import 'package:ascensore_client/client_manager.dart';
+import 'package:ascensore_client/state/app_controller.dart';
+import 'package:ascensore_client/state/app_providers.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../test/support/fakes.dart';
 
@@ -20,8 +20,9 @@ Future<void> main() async {
   final connector = FakeConnector();
   final auth = FakeAuthService(token: scenario == 'login' ? null : 'preview-token');
   // Pauses never end, so trick and set results stay on screen
-  final manager = ClientManager(auth: auth, connector: connector.call, resultDisplayTime: const Duration(hours: 1));
-  runApp(ChangeNotifierProvider.value(value: manager, child: const AscensoreApp()));
+  final app = AppController(auth: auth, connector: connector.call, resultDisplayTime: const Duration(hours: 1));
+  final match = app.match;
+  runApp(AppProviders(app: app, child: const AscensoreApp()));
   if (scenario == 'login') return;
 
   // The login page resumes the saved session, which opens the (fake) connection
@@ -41,7 +42,7 @@ Future<void> main() async {
   Future<void> start(List<String> players,
       {int setsPlayed = 0, int handSize = 1, Map<String, int> points = const {}}) async {
     await login();
-    manager.joinGame();
+    match.joinGame();
     await send('STARTING_GAME', {'connectedPlayers': players, 'maxHandSize': 10});
     await send('INFO_AFTER_RECONNECTION', {
       'set': handSize,
@@ -53,7 +54,7 @@ Future<void> main() async {
       'roundsWon': <String, int>{},
       'playedCards': <String, dynamic>{},
     });
-    for (final p in manager.game!.players) {
+    for (final p in match.game!.players) {
       p.hasBet = false;
     }
   }
@@ -66,7 +67,7 @@ Future<void> main() async {
       await login();
     case 'waiting':
       await login();
-      manager.joinGame(players: 4);
+      match.joinGame(players: 4);
       await send('JOIN_GAME_RESPONSE', {'nickname': 'andrea', 'isJoined': true, 'playersPerMatch': 4});
       await send('WAITING_ROOM_UPDATE', {
         'playersPerMatch': 4,
@@ -186,7 +187,7 @@ Future<void> main() async {
     case 'offline':
       // A real offline match: the local engine and three bots play, the human is on turn in a moment
       await login();
-      manager.playOffline(bots: 3);
+      match.playOffline(bots: 3);
     case 'replaced':
       await start(['bob', 'andrea'], setsPlayed: 2, handSize: 3);
       await send('SESSION_REPLACED');
