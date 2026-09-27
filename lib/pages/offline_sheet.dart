@@ -124,7 +124,7 @@ class CountOption extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text('$count', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: color)),
-              Text(label, style: TextStyle(fontSize: 11, color: color)),
+              FittedBox(fit: BoxFit.scaleDown, child: Text(label, style: TextStyle(fontSize: 11, color: color))),
             ],
           ),
         ),

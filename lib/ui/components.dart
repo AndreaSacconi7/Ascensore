@@ -126,13 +126,17 @@ class AppButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[Icon(icon, size: 20, color: foreground), const SizedBox(width: 10)],
-              Text(
-                label,
-                style: TextStyle(
-                  color: foreground,
-                  fontSize: height < 50 ? 14 : 16,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.6,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: height < 50 ? 14 : 16,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                  ),
                 ),
               ),
             ],
@@ -248,6 +252,33 @@ class ContentWidth extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(constraints: BoxConstraints(maxWidth: maxWidth), child: child),
+    );
+  }
+}
+
+/// Gives [child], a column with spacers, at least the height of the screen, and lets it scroll when it needs
+/// more: on short screens (small phones, landscape) the spacers shrink to nothing instead of the content
+/// overflowing.
+class FillOrScroll extends StatelessWidget {
+  final Widget child;
+  final double maxWidth;
+  final EdgeInsetsGeometry padding;
+
+  const FillOrScroll({super.key, required this.child, this.maxWidth = 440, this.padding = EdgeInsets.zero});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ContentWidth(
+          maxWidth: maxWidth,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            // Measures the column at its real width, so the spacers get exactly the height left over
+            child: IntrinsicHeight(child: Padding(padding: padding, child: child)),
+          ),
+        ),
+      ),
     );
   }
 }

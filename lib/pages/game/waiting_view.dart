@@ -36,56 +36,52 @@ class _WaitingViewState extends State<WaitingView> with SingleTickerProviderStat
     final textTheme = Theme.of(context).textTheme;
 
     return SafeArea(
-      child: ContentWidth(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const Spacer(),
-              AnimatedBuilder(
-                animation: _ride,
-                builder: (context, _) {
-                  // One ride: floors 1..10 and back down, like a match
-                  final step = (_ride.value * 19).floor().clamp(0, 18);
-                  final floor = step < 10 ? step + 1 : 19 - step;
-                  return FloorIndicator(
-                    handSize: floor,
-                    setNumber: step + 1,
-                    totalSets: 19,
-                    goingUp: step < 9,
-                    peak: step == 9,
-                  );
-                },
+      child: FillOrScroll(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const Spacer(),
+            AnimatedBuilder(
+              animation: _ride,
+              builder: (context, _) {
+                // One ride: floors 1..10 and back down, like a match
+                final step = (_ride.value * 19).floor().clamp(0, 18);
+                final floor = step < 10 ? step + 1 : 19 - step;
+                return FloorIndicator(
+                  handSize: floor,
+                  setNumber: step + 1,
+                  totalSets: 19,
+                  goingUp: step < 9,
+                  peak: step == 9,
+                );
+              },
+            ),
+            const SizedBox(height: 28),
+            Text('Partita a $size giocatori', style: textTheme.headlineSmall),
+            const SizedBox(height: 8),
+            Text(
+              missing == 0 ? 'Si parte!' : (missing == 1 ? 'Manca 1 giocatore…' : 'Mancano $missing giocatori…'),
+              style: textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 28),
+            GlassPanel(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  for (var i = 0; i < size; i++)
+                    i < joined.length ? _Seat(nickname: joined[i], isMe: joined[i] == myNickname) : const _EmptySeat(),
+                ],
               ),
-              const SizedBox(height: 28),
-              Text('Partita a $size giocatori', style: textTheme.headlineSmall),
-              const SizedBox(height: 8),
-              Text(
-                missing == 0 ? 'Si parte!' : (missing == 1 ? 'Manca 1 giocatore…' : 'Mancano $missing giocatori…'),
-                style: textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 28),
-              GlassPanel(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    for (var i = 0; i < size; i++)
-                      i < joined.length
-                          ? _Seat(nickname: joined[i], isMe: joined[i] == myNickname)
-                          : const _EmptySeat(),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              AppButton(
-                label: 'Annulla',
-                icon: Icons.close_rounded,
-                style: AppButtonStyle.secondary,
-                onPressed: match.leaveGame,
-              ),
-            ],
-          ),
+            ),
+            const Spacer(),
+            AppButton(
+              label: 'Annulla',
+              icon: Icons.close_rounded,
+              style: AppButtonStyle.secondary,
+              onPressed: match.leaveGame,
+            ),
+          ],
         ),
       ),
     );
