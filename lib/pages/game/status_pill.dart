@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../model/game.dart';
 import '../../model/player.dart';
 import '../../model/player_state.dart';
-import '../../ui/countdown.dart';
 import '../../ui/theme.dart';
 
 /// One line that always says what is happening: whose turn it is, or who took the trick.
@@ -16,7 +15,6 @@ class StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (text, icon, highlight) = _describe();
-    final deadline = game.trickWinner == null ? _onTurn()?.turnDeadline : null;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       child: text == null
@@ -42,21 +40,10 @@ class StatusPill extends StatelessWidget {
                       color: highlight ? AppColors.gold : AppColors.textSecondary,
                     ),
                   ),
-                  if (deadline != null) ...[
-                    const SizedBox(width: 10),
-                    CountdownText(deadline: deadline),
-                  ],
                 ],
               ),
             ),
     );
-  }
-
-  Player? _onTurn() {
-    for (final p in game.players) {
-      if (p.playerState == PlayerState.BET || p.playerState == PlayerState.PUT) return p;
-    }
-    return null;
   }
 
   (String?, IconData, bool) _describe() {

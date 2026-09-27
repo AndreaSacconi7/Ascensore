@@ -4,7 +4,6 @@ import '../../model/game.dart';
 import '../../model/game_rules.dart';
 import '../../model/player.dart';
 import '../../ui/components.dart';
-import '../../ui/countdown.dart';
 import '../../ui/theme.dart';
 
 /// Your bet, placed on the table itself so your hand stays in view below it.
@@ -72,10 +71,6 @@ class _BetPanelState extends State<BetPanel> {
                   ),
                   style: const TextStyle(fontSize: 16),
                 ),
-                if (widget.me.turnDeadline != null) ...[
-                  const SizedBox(width: 10),
-                  CountdownText(deadline: widget.me.turnDeadline!),
-                ],
               ],
             ),
             const SizedBox(height: 10),

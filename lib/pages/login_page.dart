@@ -7,6 +7,7 @@ import '../ui/game_widgets.dart';
 import '../ui/theme.dart';
 import 'offline_sheet.dart';
 import '../state/session_controller.dart';
+import 'loading_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -74,14 +75,9 @@ class _LoginPageState extends State<LoginPage> {
       });
     }
 
-    // Resuming a saved session: just the logo, no form flashing
+    // Resuming a saved session: the loading screen, no form flashing
     if (!_submitted && (loading || manager.authState == AuthenticationState.unknown)) {
-      return const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [AppLogo(height: 40), SizedBox(height: 28), CircularProgressIndicator()],
-        ),
-      );
+      return const LoadingScreen();
     }
 
     return SafeArea(
