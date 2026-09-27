@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Account operations. Accounts live in Supabase Auth; the game server only sees the access token.
@@ -42,7 +43,13 @@ class SupabaseAuthService implements AuthService {
 
   @override
   Future<String?> signUp(String email, String password) async {
-    final response = await _auth.signUp(email: email, password: password);
+    final response = await _auth.signUp(
+      email: email,
+      password: password,
+      // On the web the confirmation link leads back to the page the player signed up from (it must be listed
+      // among the project's redirect URLs); elsewhere Supabase uses the project's site URL
+      emailRedirectTo: kIsWeb ? '${Uri.base.origin}${Uri.base.path}' : null,
+    );
     return response.session?.accessToken;
   }
 

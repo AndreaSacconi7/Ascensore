@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -18,7 +18,15 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Real-time multiplayer client for Ascensore, an Italian card game.">
+  <meta name="description" content="Ascensore, il gioco di carte delle scommesse: online da 2 a 4 giocatori o contro il computer.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0A0F26">
+
+  <!-- Link previews -->
+  <meta property="og:title" content="Ascensore">
+  <meta property="og:description" content="Il gioco di carte delle scommesse: online da 2 a 4 giocatori o contro il computer.">
+  <meta property="og:image" content="icons/Icon-512.png">
+  <meta property="og:type" content="website">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,7 +40,13 @@
   <title>Ascensore</title>
   <link rel="manifest" href="manifest.json">
 </head>
-<body>
+<body style="margin: 0; background: #0A0F26;">
+  <!-- Shown while the app loads, instead of a blank page; the app draws over it -->
+  <div style="position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+              gap: 16px; color: #C9CDE4; font: 600 16px system-ui, sans-serif;">
+    <img src="icons/Icon-192.png" alt="" width="96" height="96" style="border-radius: 22px;">
+    Caricamento…
+  </div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

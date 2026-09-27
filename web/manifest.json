@@ -3,9 +3,9 @@
     "short_name": "Ascensore",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "Real-time multiplayer client for Ascensore, an Italian card game.",
+    "background_color": "#0A0F26",
+    "theme_color": "#0A0F26",
+    "description": "Ascensore, il gioco di carte delle scommesse: online da 2 a 4 giocatori o contro il computer.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
@@ -31,5 +31,6 @@
             "type": "image/png",
             "purpose": "maskable"
         }
-    ]
+    ],
+    "lang": "it"
 }

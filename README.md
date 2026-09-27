@@ -2,6 +2,8 @@
 
 Real-time multiplayer client for **Ascensore**, a traditional Italian trick-taking card game, built with **Flutter** and talking to a **Java / Spring Boot** game server over **WebSockets**.
 
+**▶ Play in the browser: [andreasacconi7.github.io/Ascensore_Card_Game](https://andreasacconi7.github.io/Ascensore_Card_Game/)** — sign up to play online with 2–4 players, or play offline against the computer without an account. The interface is in Italian.
+
 <p align="center">
   <img src="docs/screenshots/menu.jpg" width="200" alt="Main menu">
   <img src="docs/screenshots/bet.jpg" width="200" alt="Betting">
@@ -88,6 +90,8 @@ flutter run --dart-define=SERVER_URL=wss://your-server/ws
 ```
 
 Without `SERVER_URL` the app connects to a local server (`ws://localhost:8080/ws` on the web, `ws://10.0.2.2:8080/ws` from the Android emulator).
+
+**Web deployment** — every push to `main` runs `.github/workflows/deploy-web.yml`: analysis, tests, a release build against the production server (`wss://ascensore-server.fly.dev/ws`) and publication on GitHub Pages. Sign-up confirmation links lead back to the page the player signed up from, so that address must be listed among the Supabase project's redirect URLs.
 
 ```bash
 flutter test
