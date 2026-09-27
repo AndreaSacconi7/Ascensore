@@ -34,7 +34,7 @@ class SessionReplacedPage extends StatelessWidget {
                     textAlign: TextAlign.center, style: textTheme.headlineSmall),
                 const SizedBox(height: 8),
                 Text(
-                  'Il tuo account è stato aperto altrove, quindi qui ci siamo disconnessi. '
+                  'Il tuo profilo è stato aperto altrove, quindi qui ci siamo disconnessi. '
                   'Se giochi qui, l\'altro dispositivo verrà disconnesso.',
                   textAlign: TextAlign.center,
                   style: textTheme.bodyMedium?.copyWith(height: 1.4),
@@ -42,7 +42,10 @@ class SessionReplacedPage extends StatelessWidget {
                 const SizedBox(height: 28),
                 AppButton(label: 'GIOCA QUI', icon: Icons.phone_iphone_rounded, onPressed: manager.playHere),
                 const SizedBox(height: 12),
-                AppButton(label: 'Esci', style: AppButtonStyle.secondary, onPressed: manager.logOut),
+                if (manager.canSignOut)
+                  AppButton(label: 'Esci', style: AppButtonStyle.secondary, onPressed: manager.logOut)
+                else
+                  AppButton(label: 'Torna al menu', style: AppButtonStyle.secondary, onPressed: manager.leaveReplaced),
               ],
             ),
           ),

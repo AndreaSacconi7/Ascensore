@@ -3,7 +3,7 @@
 //   flutter build web -t tool/design_preview.dart -o /tmp/preview
 //   open <served preview>/?s=play
 //
-// Scenarios: login, nickname, menu, waiting, bet, bet10, play, left, trick, peak, setresult, gameover, offline, replaced, reconnecting.
+// Scenarios: login (email accounts, off in the app), welcome (menu with no profile yet), nickname, menu, waiting, bet, bet10, play, left, trick, peak, setresult, gameover, offline, replaced, reconnecting.
 import 'dart:async';
 
 import 'package:ascensore_client/app.dart';
@@ -18,12 +18,18 @@ Map<String, dynamic> card(String seed, int value) => {'seed': seed, 'value': val
 Future<void> main() async {
   final scenario = Uri.base.queryParameters['s'] ?? 'play';
   final connector = FakeConnector();
-  final auth = FakeAuthService(token: scenario == 'login' ? null : 'preview-token');
+  final auth = FakeAuthService(token: scenario == 'login' || scenario == 'welcome' ? null : 'preview-token');
   // Pauses never end, so trick and set results stay on screen
-  final app = AppController(auth: auth, connector: connector.call, resultDisplayTime: const Duration(hours: 1));
+  final app = AppController(
+    auth: auth,
+    connector: connector.call,
+    // The login page only exists with email accounts, which are off in the app for now
+    emailAccounts: scenario == 'login',
+    resultDisplayTime: const Duration(hours: 1),
+  );
   final match = app.match;
   runApp(AppProviders(app: app, child: const AscensoreApp()));
-  if (scenario == 'login') return;
+  if (scenario == 'login' || scenario == 'welcome') return;
 
   // The login page resumes the saved session, which opens the (fake) connection
   while (connector.connections.isEmpty) {
@@ -61,6 +67,8 @@ Future<void> main() async {
 
   switch (scenario) {
     case 'nickname':
+      // The nickname is asked when the player goes online for the first time
+      unawaited(app.playOnline());
       await send('PLAYER_INFO_RESPONSE',
           {'nickname': '', 'isLogged': false, 'needsNickname': true, 'error': 'NICKNAME_MISSING'});
     case 'menu':

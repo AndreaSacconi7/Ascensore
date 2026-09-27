@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../ui/components.dart';
 import '../ui/game_widgets.dart';
 import '../ui/theme.dart';
+import '../state/app_controller.dart';
 import '../state/match_controller.dart';
 import '../state/session_controller.dart';
 import 'offline_sheet.dart';
@@ -26,6 +27,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Creating the profile and connecting before the first online match
+    final joining = context.select<AppController, bool>((app) => app.joining);
     return SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -35,14 +38,14 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           return FillOrScroll(
             maxWidth: sideBySide ? 960 : 480,
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-            child: sideBySide ? _sideBySide() : _stacked(showCards: !compact),
+            child: sideBySide ? _sideBySide(joining: joining) : _stacked(showCards: !compact, joining: joining),
           );
         },
       ),
     );
   }
 
-  Widget _stacked({required bool showCards}) {
+  Widget _stacked({required bool showCards, required bool joining}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -51,14 +54,14 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         _Brand(showCards: showCards),
         const Spacer(),
         const SizedBox(height: 16),
-        _newMatchPanel(),
+        _newMatchPanel(joining: joining),
         const SizedBox(height: 12),
         const _RulesButton(),
       ],
     );
   }
 
-  Widget _sideBySide() {
+  Widget _sideBySide({required bool joining}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -74,7 +77,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [_newMatchPanel(), const SizedBox(height: 12), const _RulesButton()],
+                  children: [_newMatchPanel(joining: joining), const SizedBox(height: 12), const _RulesButton()],
                 ),
               ),
             ],
@@ -84,7 +87,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 
-  Widget _newMatchPanel() {
+  Widget _newMatchPanel({required bool joining}) {
     final match = context.read<MatchController>();
     final textTheme = Theme.of(context).textTheme;
     return GlassPanel(
@@ -134,7 +137,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           AppButton(
             label: 'GIOCA',
             icon: _offline ? Icons.smart_toy_rounded : Icons.play_arrow_rounded,
-            onPressed: () => _offline ? match.playOffline(bots: _bots) : match.joinGame(players: _players),
+            loading: !_offline && joining,
+            onPressed: () =>
+                _offline ? match.playOffline(bots: _bots) : context.read<AppController>().playOnline(players: _players),
           ),
         ],
       ),
@@ -142,33 +147,46 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 }
 
-/// Who is playing, and the way out.
+/// Who is playing, and the way out (only for email accounts: an anonymous profile is never signed out of).
 class _Header extends StatelessWidget {
   const _Header();
 
   @override
   Widget build(BuildContext context) {
     final session = context.read<SessionController>();
-    final nickname = context.select<SessionController, String>((s) => s.nickname ?? '');
+    final nickname = context.select<SessionController, String?>((s) => s.nickname);
+    final canSignOut = context.select<SessionController, bool>((s) => s.canSignOut);
     final textTheme = Theme.of(context).textTheme;
     return Row(
       children: [
-        PlayerAvatar(nickname: nickname, size: 44),
-        const SizedBox(width: 12),
+        if (nickname != null) ...[
+          PlayerAvatar(nickname: nickname, size: 44),
+          const SizedBox(width: 12),
+        ],
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Ciao,', style: textTheme.bodyMedium),
-              Text(nickname, style: textTheme.titleLarge, overflow: TextOverflow.ellipsis),
-            ],
+          child: nickname != null
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Ciao,', style: textTheme.bodyMedium),
+                    Text(nickname, style: textTheme.titleLarge, overflow: TextOverflow.ellipsis),
+                  ],
+                )
+              // No profile yet: nothing to fill in until the first online match
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Ciao!', style: textTheme.titleLarge),
+                    Text('Il nickname lo scegli alla prima partita online.', style: textTheme.bodyMedium),
+                  ],
+                ),
+        ),
+        if (canSignOut)
+          IconButton(
+            tooltip: 'Esci',
+            onPressed: session.logOut,
+            icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
           ),
-        ),
-        IconButton(
-          tooltip: 'Esci',
-          onPressed: session.logOut,
-          icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
-        ),
       ],
     );
   }

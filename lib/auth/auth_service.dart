@@ -12,6 +12,12 @@ abstract class AuthService {
   /// Returns the access token, or null if the account must be confirmed by email first.
   Future<String?> signUp(String email, String password);
 
+  /// Creates a profile tied to this device, with no email or password, and returns its access token.
+  Future<String> signInAnonymously();
+
+  /// True if the saved profile is anonymous: signing out would lose it for good.
+  bool get isAnonymous;
+
   Future<void> signOut();
 }
 
@@ -52,6 +58,19 @@ class SupabaseAuthService implements AuthService {
     );
     return response.session?.accessToken;
   }
+
+  @override
+  Future<String> signInAnonymously() async {
+    final response = await _auth.signInAnonymously();
+    final token = response.session?.accessToken;
+    if (token == null) {
+      throw const AuthException('No session returned');
+    }
+    return token;
+  }
+
+  @override
+  bool get isAnonymous => _auth.currentUser?.isAnonymous ?? false;
 
   @override
   Future<void> signOut() => _auth.signOut();

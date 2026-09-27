@@ -9,6 +9,8 @@ import 'offline_sheet.dart';
 import '../state/session_controller.dart';
 import 'loading_screen.dart';
 
+/// Sign-in and sign-up with email and password. Only shown with email accounts on (see `config.dart`): for now
+/// players get an anonymous profile and choose just a nickname.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -26,14 +28,6 @@ class _LoginPageState extends State<LoginPage> {
   // True after the user submits the form, so a pending check shows in the button, not as a splash
   bool _submitted = false;
   String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SessionController>().checkLoginStatus();
-    });
-  }
 
   @override
   void dispose() {

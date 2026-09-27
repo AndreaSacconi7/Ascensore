@@ -6,6 +6,7 @@ import '../ui/components.dart';
 import '../ui/game_widgets.dart';
 import '../ui/theme.dart';
 import '../state/session_controller.dart';
+import '../state/app_controller.dart';
 
 /// Shown once per account: the public name other players see (never the email address).
 class ChooseNicknamePage extends StatefulWidget {
@@ -106,11 +107,15 @@ class _ChooseNicknamePageState extends State<ChooseNicknamePage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                AppButton(
-                  label: 'Esci',
-                  style: AppButtonStyle.ghost,
-                  onPressed: manager.logOut,
-                ),
+                // An anonymous profile is not signed out of (it would be lost): the player just goes back
+                if (manager.emailAccounts)
+                  AppButton(label: 'Esci', style: AppButtonStyle.ghost, onPressed: manager.logOut)
+                else
+                  AppButton(
+                    label: 'Annulla',
+                    style: AppButtonStyle.ghost,
+                    onPressed: context.read<AppController>().cancelNickname,
+                  ),
               ],
             ),
           ),

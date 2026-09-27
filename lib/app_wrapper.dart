@@ -31,6 +31,13 @@ class _AppWrapperState extends State<AppWrapper> {
   MatchController? _match;
 
   @override
+  void initState() {
+    super.initState();
+    // Resumes the saved profile, if any, so the player is known by the time they reach the menu
+    WidgetsBinding.instance.addPostFrameCallback((_) => context.read<SessionController>().checkLoginStatus());
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final match = context.read<MatchController>();

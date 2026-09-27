@@ -7,8 +7,24 @@ import 'package:ascensore_client/network/game_connection.dart';
 class FakeAuthService implements AuthService {
   String? token;
   bool signedOut = false;
+  bool anonymous = false;
+  int anonymousSignIns = 0;
+
+  /// Anonymous sign-in fails (disabled in the project, or no network).
+  bool anonymousFails = false;
 
   FakeAuthService({this.token});
+
+  @override
+  Future<String> signInAnonymously() async {
+    if (anonymousFails) throw StateError('anonymous sign-ins are disabled');
+    anonymousSignIns++;
+    anonymous = true;
+    return token = 'anon-token';
+  }
+
+  @override
+  bool get isAnonymous => anonymous;
 
   @override
   Future<String?> currentAccessToken() async => token;

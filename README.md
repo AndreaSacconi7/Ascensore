@@ -10,7 +10,7 @@ Real-time multiplayer client for **Ascensore**, a traditional Italian trick-taki
 
 <p align="center">
   <b><a href="https://andreasacconi7.github.io/Ascensore_Card_Game/">andreasacconi7.github.io/Ascensore_Card_Game</a></b><br>
-  Sign up to play online with 2–4 players, or play offline against the computer without an account.<br>
+  No sign-up: pick a nickname and play online with 2–4 players, or play offline against the computer.<br>
   Works on desktop and mobile browsers; the interface is in Italian.
 </p>
 
@@ -29,14 +29,14 @@ At the start of every set each player **bets exactly how many tricks they will t
 ## Features
 
 - **Real-time multiplayer** over a persistent WebSocket connection; runs on Android, iOS and the web
-- **Authentication with Supabase** (email/password, PKCE flow); the access token is sent to the game server, which verifies it independently
+- **No sign-up** — like most mobile games, the first online match creates an anonymous Supabase profile tied to the device and the player only picks a nickname; the access token is sent to the game server, which verifies it independently. Email accounts (for saving a profile across devices) are implemented but switched off for now (`lib/config.dart`)
 - **2, 3 or 4 players** — pick the match size in the menu; a waiting room shows who has joined and the free seats, and you can leave the queue
 - **Offline against bots** — 1 to 3 computer opponents, no connection or account needed: a local engine with the same rules speaks the server's protocol, so the whole client (state, queue, screens) runs unchanged
 - **Turn timer** — a ring around the player on turn empties as their time runs out (red in the last 10 s); when it expires the server plays for them
 - **One device per account** — opening the game elsewhere disconnects this device, which then offers to play here again
 - **Leave at any time** — after a confirmation; the others play on without you (with two players, the other one wins)
-- **Public nicknames** — players choose a unique nickname on first login; the email address is never shown to other players
-- **Automatic login** — the session is restored and refreshed on app start
+- **Public nicknames** — unique, chosen on the first online match; nothing else about the player is shown to others
+- **Automatic login** — the profile is restored and refreshed when the game opens
 - **Reconnection** — a dropped connection is retried with backoff while a banner shows the state; the server keeps the seat for 60 seconds and replays the table (hand, briscola, bets, tricks, cards on the table, whose turn it is)
 - **Server-authoritative state** — the client never changes game state optimistically; it validates moves locally for instant feedback (must follow suit, last-bidder constraint) and applies only what the server confirms
 - **Elevator floor indicator** — the current hand size with its direction of travel and the set number (e.g. *5 ▲, 5/19*)
@@ -113,7 +113,7 @@ flutter test
 flutter run -d chrome -t tool/design_preview.dart
 ```
 
-Pick a screen with the `s` query parameter: `?s=login`, `nickname`, `menu`, `waiting`, `bet`, `bet10`, `play`, `left`, `trick`, `peak`, `setresult`, `gameover`, `offline`, `replaced`, `reconnecting`.
+Pick a screen with the `s` query parameter: `?s=welcome`, `login`, `nickname`, `menu`, `waiting`, `bet`, `bet10`, `play`, `left`, `trick`, `peak`, `setresult`, `gameover`, `offline`, `replaced`, `reconnecting`.
 
 ## Known limitations
 

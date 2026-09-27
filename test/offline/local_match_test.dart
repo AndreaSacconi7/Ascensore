@@ -62,7 +62,7 @@ void main() {
   }
 
   test(
-      'leaving an offline match stops the bots and returns a guest to the login page',
+      'leaving an offline match stops the bots and returns a player with no profile to the menu',
       () => run((async) {
             manager.match.playOffline(bots: 2);
             async.elapse(const Duration(seconds: 5));
@@ -72,7 +72,7 @@ void main() {
 
             expect(manager.match.isOffline, isFalse);
             expect(manager.match.game, isNull);
-            expect(manager.screen, AppScreenState.login);
+            expect(manager.screen, AppScreenState.mainMenu);
           }));
 
   test(

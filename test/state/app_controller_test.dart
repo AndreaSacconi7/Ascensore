@@ -21,20 +21,24 @@ void main() {
   late FakeConnector connector;
   late AppController app;
 
-  // Everything runs in fake time so result pauses and reconnection backoff are deterministic
-  void run(void Function(FakeAsync async) body) {
+  // Everything runs in fake time so result pauses and reconnection backoff are deterministic. [token] is the
+  // profile saved on the device, if any; [emailAccounts] turns on the email sign-in that is off for now.
+  void run(void Function(FakeAsync async) body, {String? token = 'token', bool emailAccounts = false}) {
     fakeAsync((async) {
-      auth = FakeAuthService(token: 'token');
+      auth = FakeAuthService(token: token);
       connector = FakeConnector();
       app = AppController(
         auth: auth,
         connector: connector.call,
+        emailAccounts: emailAccounts,
         resultDisplayTime: displayTime,
         reconnectBackoff: const [Duration(seconds: 1)],
       );
       body(async);
     });
   }
+
+  void runWithEmailAccounts(void Function(FakeAsync async) body) => run(body, emailAccounts: true);
 
   void server(FakeAsync async, String type, [Map<String, dynamic> executable = const {}]) {
     connector.last.receive(type, executable);
@@ -61,10 +65,128 @@ void main() {
     server(async, 'BRISCOLA_UPDATE', {'briscolaCard': card('COINS', 7)});
   }
 
-  group('login', () {
+  group('playing without an account', () {
+    test(
+        'the app opens on the menu, and bots need no profile at all',
+        () => run((async) {
+              app.session.checkLoginStatus();
+              async.flushMicrotasks();
+
+              expect(app.screen, AppScreenState.mainMenu);
+              expect(connector.connections, isEmpty, reason: 'nobody to identify, nothing to connect to');
+              app.match.playOffline(bots: 1);
+              expect(app.screen, AppScreenState.inGame);
+              expect(auth.anonymousSignIns, 0);
+            }, token: null));
+
+    test(
+        'the first online match creates an anonymous profile, asks only for a nickname, then joins',
+        () => run((async) {
+              app.session.checkLoginStatus();
+              async.flushMicrotasks();
+
+              app.playOnline(players: 3);
+              expect(app.joining, isTrue);
+              async.flushMicrotasks();
+              expect(auth.anonymousSignIns, 1);
+              expect(connector.last.sent.single['executable']['token'], 'anon-token');
+
+              server(async, 'PLAYER_INFO_RESPONSE',
+                  {'nickname': '', 'isLogged': false, 'needsNickname': true, 'error': 'NICKNAME_MISSING'});
+              expect(app.screen, AppScreenState.chooseNickname);
+
+              app.session.submitNickname('alice');
+              async.flushMicrotasks();
+              loggedIn(async, 'alice');
+
+              expect(connector.last.sent.last, {
+                'commandType': 'JOIN_GAME_REQUEST',
+                'executable': {'players': 3},
+              });
+              expect(app.screen, AppScreenState.inGame);
+              expect(app.match.waitingRoom!.players, ['alice']);
+              expect(app.joining, isFalse);
+            }, token: null));
+
+    test(
+        'a returning player keeps their profile and joins straight away',
+        () => run((async) {
+              app.session.checkLoginStatus();
+              async.flushMicrotasks();
+              loggedIn(async, 'alice');
+              expect(app.session.nickname, 'alice');
+
+              app.playOnline(players: 2);
+
+              expect(auth.anonymousSignIns, 0);
+              expect(connector.last.sentTypes.last, 'JOIN_GAME_REQUEST');
+            }));
+
+    test(
+        'a saved profile without a nickname is not asked for one until the player goes online',
+        () => run((async) {
+              app.session.checkLoginStatus();
+              async.flushMicrotasks();
+              server(async, 'PLAYER_INFO_RESPONSE',
+                  {'nickname': '', 'isLogged': false, 'needsNickname': true, 'error': 'NICKNAME_MISSING'});
+              async.flushMicrotasks();
+
+              expect(app.screen, AppScreenState.mainMenu);
+              expect(app.session.linkState, LinkState.closed, reason: 'offline until the player wants to play online');
+
+              app.playOnline();
+              async.flushMicrotasks();
+              server(async, 'PLAYER_INFO_RESPONSE',
+                  {'nickname': '', 'isLogged': false, 'needsNickname': true, 'error': 'NICKNAME_MISSING'});
+              expect(app.screen, AppScreenState.chooseNickname);
+            }));
+
+    test(
+        'cancelling the nickname goes back to the menu without joining',
+        () => run((async) {
+              app.playOnline(players: 4);
+              async.flushMicrotasks();
+              server(async, 'PLAYER_INFO_RESPONSE',
+                  {'nickname': '', 'isLogged': false, 'needsNickname': true, 'error': 'NICKNAME_MISSING'});
+
+              app.cancelNickname();
+              async.flushMicrotasks();
+
+              expect(app.screen, AppScreenState.mainMenu);
+              expect(app.joining, isFalse);
+              expect(auth.signedOut, isFalse, reason: 'the anonymous profile is kept');
+              expect(connector.last.sentTypes, isNot(contains('JOIN_GAME_REQUEST')));
+            }, token: null));
+
+    test(
+        'an anonymous profile cannot be signed out of, so it is never lost by mistake',
+        () => run((async) {
+              app.playOnline();
+              async.flushMicrotasks();
+              loggedIn(async, 'alice');
+
+              expect(app.session.canSignOut, isFalse);
+            }, token: null));
+
+    test(
+        'when no profile can be created the player stays on the menu and is told',
+        () => run((async) {
+              auth.anonymousFails = true;
+
+              app.playOnline();
+              async.flushMicrotasks();
+
+              expect(app.screen, AppScreenState.mainMenu);
+              expect(app.joining, isFalse);
+              expect(app.match.consumeNotice(), isNotNull);
+              expect(connector.connections, isEmpty);
+            }, token: null));
+  });
+
+  group('email accounts (off for now, kept for saving profiles)', () {
     test(
         'a saved session connects and identifies the player',
-        () => run((async) {
+        () => runWithEmailAccounts((async) {
               app.session.checkLoginStatus();
               async.flushMicrotasks();
 
@@ -77,7 +199,7 @@ void main() {
 
     test(
         'a new account chooses a nickname until the server accepts one',
-        () => run((async) {
+        () => runWithEmailAccounts((async) {
               app.session.checkLoginStatus();
               async.flushMicrotasks();
               server(async, 'PLAYER_INFO_RESPONSE',
@@ -101,7 +223,7 @@ void main() {
 
     test(
         'a refused token signs the player out',
-        () => run((async) {
+        () => runWithEmailAccounts((async) {
               app.session.checkLoginStatus();
               async.flushMicrotasks();
               server(async, 'PLAYER_INFO_RESPONSE', {'nickname': '', 'isLogged': false, 'error': 'INVALID_TOKEN'});
@@ -271,7 +393,7 @@ void main() {
 
     test(
         'logging out during a pause cancels it',
-        () => run((async) {
+        () => runWithEmailAccounts((async) {
               startMatch(async);
               server(async, 'END_ROUND', {
                 'nextRoundNumber': 1,

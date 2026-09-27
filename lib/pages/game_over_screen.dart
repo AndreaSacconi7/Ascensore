@@ -17,7 +17,8 @@ class GameOverScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final match = context.watch<MatchController>();
-    final isGuest = context.select<SessionController, bool>((s) => s.isGuest);
+    // A guest with email accounts on goes back to the login page, everyone else to the menu
+    final toLogin = context.select<SessionController, bool>((s) => s.emailAccounts && s.isGuest);
     final game = match.game;
     final me = match.me;
     if (game == null || me == null) return const SizedBox.shrink();
@@ -84,7 +85,7 @@ class GameOverScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               AppButton(
-                label: isGuest ? 'Esci' : 'Torna al menu',
+                label: toLogin ? 'Esci' : 'Torna al menu',
                 style: AppButtonStyle.secondary,
                 onPressed: match.backToMenu,
               ),

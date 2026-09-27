@@ -162,6 +162,12 @@ class MatchController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Shows a one-off message to the player.
+  void showNotice(String text) {
+    notice = text;
+    notifyListeners();
+  }
+
   /// Returns the pending notice and clears it.
   String? consumeNotice() {
     final pending = notice;
