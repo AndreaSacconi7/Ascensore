@@ -3,13 +3,13 @@
 Real-time multiplayer client for **Ascensore**, a traditional Italian trick-taking card game, built with **Flutter** and talking to a **Java / Spring Boot** game server over **WebSockets**.
 
 <p align="center">
-  <a href="https://andreasacconi7.github.io/Ascensore_Card_Game/">
+  <a href="https://andreasacconi7.github.io/Ascensore/">
     <img src="https://img.shields.io/badge/%E2%96%B6%20Play%20now-in%20the%20browser-F5C451?style=for-the-badge&labelColor=1B2257" alt="Play now in the browser">
   </a>
 </p>
 
 <p align="center">
-  <b><a href="https://andreasacconi7.github.io/Ascensore_Card_Game/">andreasacconi7.github.io/Ascensore_Card_Game</a></b><br>
+  <b><a href="https://andreasacconi7.github.io/Ascensore/">andreasacconi7.github.io/Ascensore</a></b><br>
   No sign-up: pick a nickname and play online with 2–4 players, or play offline against the computer.<br>
   Works on desktop and mobile browsers; the interface is in Italian.
 </p>
