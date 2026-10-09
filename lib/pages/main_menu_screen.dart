@@ -20,7 +20,8 @@ class MainMenuScreen extends StatefulWidget {
 class _MainMenuScreenState extends State<MainMenuScreen> {
   late int _players = context.read<MatchController>().matchSize;
   late int _bots = context.read<MatchController>().offlineBots;
-  bool _offline = false;
+  // Against the bots by default: someone opening the link can play at once instead of waiting alone in a queue
+  bool _offline = true;
 
   // Below this height the decorative cards are left out; below the content's own height the page scrolls
   static const _compactHeight = 720.0;
